@@ -1,0 +1,13 @@
+[package]
+name = "lib_protos"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+prost = { version = "0.13.3", features = ["derive"] }
+serde ={ version = "1.0.210", features = ["derive"] }
+tonic ={ version = "0.12.3"}
+pbjson = { version = "0.7.0" }
+pbjson-types = { version = "0.7.0" }

@@ -5,7 +5,7 @@ create:
 	docker-compose -p delta-tickets create
 
 deploy:
-	docker-compose -p delta-tickets up -d
+	docker-compose -p delta-tickets up
 
 down:
 	docker-compose -p delta-tickets down

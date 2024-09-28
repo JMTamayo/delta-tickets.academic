@@ -26,6 +26,20 @@ services:
     ports:
       - '6379:6379'
 
+  users-manager:
+    build:
+      context: .
+      dockerfile: manager-users/Dockerfile
+    container_name: users-manager
+    restart: always
+    ports:
+      - '50051:80'
+    env_file:
+      - ./secrets/db_users.env
+    environment:
+      - POSTGRES_HOST=pgdb-users
+      - POSTGRES_PORT=5432
+
 volumes:
   db:
     driver: local
