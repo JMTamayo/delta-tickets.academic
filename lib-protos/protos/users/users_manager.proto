@@ -1,0 +1,23 @@
+syntax ="proto3";
+package users_manager;
+
+message Role {
+	string id = 1;
+	string name = 2;
+	string description = 3;
+}
+
+message GetUserRequest {
+    string username = 1;
+}
+
+message User {
+    string id = 1;
+    string username = 2;
+    string password = 3;
+	Role role = 4;
+}
+
+service UsersManagerServices {
+    rpc Get(GetUserRequest) returns (User) {};
+}
