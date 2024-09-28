@@ -4,14 +4,6 @@ use tracing_subscriber::{fmt as TracingFmt, fmt::time::UtcTime};
 pub struct LoggingConfig;
 
 impl LoggingConfig {
-    // Initialize the logging system
-    //
-    // # Arguments:
-    // - self.
-    // - level: Log level as a &str.
-    //
-    // # Returns:
-    // - No return value.
     pub fn init(&self) {
         TracingFmt()
             .json()
