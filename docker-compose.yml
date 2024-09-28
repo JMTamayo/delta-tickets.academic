@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  db-users:
+    image: postgres:16.3-alpine
+    container_name: pgdb-users
+    restart: always
+    ports:
+      - '5432:5432'
+    env_file:
+        - ./secrets/db_users.env
+
+  db-events:
+    image: postgres:17.0-alpine3.20
+    container_name: pgdb-events
+    restart: always
+    ports:
+      - '5433:5432'
+    env_file:
+        - ./secrets/db_events.env
+
+  cache-db:
+    image: redis:7.2.5
+    container_name: redis-db
+    restart: always
+    ports:
+      - '6379:6379'
+
+volumes:
+  db:
+    driver: local
