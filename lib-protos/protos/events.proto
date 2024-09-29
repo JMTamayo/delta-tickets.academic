@@ -1,0 +1,16 @@
+syntax ="proto3";
+package users_manager;
+
+message GetUserEventRelRequest {
+    string id = 1;
+}
+
+message UserEventRel {
+    string id = 1;
+    string user_id = 2;
+    string event_id = 3;
+}
+
+service UserEventRelManagerServices {
+    rpc Get(GetUserEventRelRequest) returns (UserEventRel) {};
+}
