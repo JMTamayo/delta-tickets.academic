@@ -77,7 +77,21 @@ services:
     volumes:
       - ./front-app:/app
       - ./front-app/node_modules:/app/node_modules
-      
+
+  back-events:
+    build:
+      context: .
+      dockerfile: back-events/Dockerfile
+    container_name: back-events
+    restart: always
+    ports:
+      - '8001:80'
+    environment:
+      - EVENTS_MANAGER_HOST=events-manager
+      - EVENTS_MANAGER_PORT=80
+      - AUTH_SERVICE_HOST=auth
+      - AUTH_SERVICE_PORT=80
+
 volumes:
   db:
     driver: local
