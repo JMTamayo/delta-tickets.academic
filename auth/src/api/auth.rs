@@ -1,5 +1,7 @@
 use axum::{
-    http::{HeaderMap, StatusCode},
+    body::Body,
+    http::{HeaderMap, Request, StatusCode},
+    middleware::{self, Next},
     response::{IntoResponse, Response},
     routing::post,
     Json, Router,
@@ -26,11 +28,21 @@ impl AuthServices {
     }
 
     pub fn get_router(&self) -> Router {
-        Router::new().nest(
-            self.get_path_base(),
-            Router::new().route("/verify", post(verify_token)),
-        )
+        Router::new()
+            .nest(
+                self.get_path_base(),
+                Router::new().route("/verify", post(verify_token)),
+            )
+            .layer(middleware::from_fn(add_cors_header))
     }
+}
+
+async fn add_cors_header(req: Request<Body>, next: Next) -> impl IntoResponse {
+    let mut response = next.run(req).await;
+    response
+        .headers_mut()
+        .insert("Access-Control-Allow-Origin", "*".parse().unwrap());
+    response
 }
 
 pub async fn verify_token(headers: HeaderMap) -> Response {
@@ -48,7 +60,7 @@ pub async fn verify_token(headers: HeaderMap) -> Response {
                         "Invalid headers in request",
                     )),
                 )
-                    .into_response()
+                    .into_response();
             }
         };
 

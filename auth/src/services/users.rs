@@ -15,18 +15,22 @@ impl UsersManager {
     }
 
     pub async fn verify_user(&self, username: &str, key: &str) -> Result<bool, Exception> {
-        let mut client =
-            match UsersManagerServicesClient::connect(CONFIG.get_users_manager_config().get_conn_str())
-                .await
-            {
-                Ok(client) => client,
-                Err(e) => {
-                    return Err(Exception::new(
-                        ErrorKind::InternalServerError,
-                        &format!("Failed to connect to the users manager service**: {}", e.to_string()),
-                    ))
-                }
-            };
+        let mut client = match UsersManagerServicesClient::connect(
+            CONFIG.get_users_manager_config().get_conn_str(),
+        )
+        .await
+        {
+            Ok(client) => client,
+            Err(e) => {
+                return Err(Exception::new(
+                    ErrorKind::InternalServerError,
+                    &format!(
+                        "Failed to connect to the users manager service**: {}",
+                        e.to_string()
+                    ),
+                ))
+            }
+        };
 
         let password: String = match client
             .get(Request::new(GetUserRequest {
