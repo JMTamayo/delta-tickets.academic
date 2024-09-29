@@ -40,6 +40,20 @@ services:
       - POSTGRES_HOST=pgdb-users
       - POSTGRES_PORT=5432
 
+  events-manager:
+    build:
+      context: .
+      dockerfile: manager-events/Dockerfile
+    container_name: events-manager
+    restart: always
+    ports:
+      - '50052:80'
+    env_file:
+      - ./secrets/db_events.env
+    environment:
+      - POSTGRES_HOST=pgdb-events
+      - POSTGRES_PORT=5432
+
   auth:
     build:
       context: .

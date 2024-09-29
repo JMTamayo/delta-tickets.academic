@@ -5,8 +5,8 @@
 	WORKDIR /app
 	
 	# Copying the application source code to the constructor:
-	COPY ./manager-users/src ./src
-	COPY ./manager-users/Cargo.toml ./Cargo.toml
+	COPY ./manager-events/src ./src
+	COPY ./manager-events/Cargo.toml ./Cargo.toml
 	COPY ./lib-protos ./../lib-protos
 
 	# Build the proyect:
