@@ -66,18 +66,20 @@ services:
       - USERS_MANAGER_HOST=users-manager
       - USERS_MANAGER_PORT=80
 
-  front-app:
-    build: 
-      context: ./front-app
-      dockerfile: Dockerfile
-    container_name: front-app
+  back-events:
+    build:
+      context: .
+      dockerfile: back-events/Dockerfile
+    container_name: back-events
     restart: always
     ports:
-      - '3000:3000'
-    volumes:
-      - ./front-app:/app
-      - ./front-app/node_modules:/app/node_modules
-      
+      - '8001:80'
+    environment:
+      - EVENTS_MANAGER_HOST=events-manager
+      - EVENTS_MANAGER_PORT=80
+      - AUTH_SERVICE_HOST=auth
+      - AUTH_SERVICE_PORT=80
+
 volumes:
   db:
     driver: local

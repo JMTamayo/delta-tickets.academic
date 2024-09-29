@@ -5,8 +5,8 @@
 	WORKDIR /app
 	
 	# Copying the application source code to the constructor:
-	COPY ./auth/src ./src
-	COPY ./auth/Cargo.toml ./Cargo.toml
+	COPY ./back-events/src ./src
+	COPY ./back-events/Cargo.toml ./Cargo.toml
 	COPY ./lib-protos ./../lib-protos
 
 	# Build the proyect:
@@ -16,7 +16,7 @@
 	FROM rust:latest
 
 	# Copying app binary from builder:
-	COPY --from=builder /app/target/release/auth-service .
+	COPY --from=builder /app/target/release/back-events .
 	
 	# Run the application:
-	CMD ["./auth-service"]
+	CMD ["./back-events"]
