@@ -15,8 +15,11 @@ import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
 // import ForgotPassword from './ForgotPassword';
 import { GoogleIcon, FacebookIcon, SitemarkIcon } from './CustomIcons';
-import AppTheme from "../themes/AppTheme";
-import ColorModeSelect from "../themes/ColorModeSelect";
+import AppTheme from "../../themes/AppTheme";
+import ColorModeSelect from "../../themes/ColorModeSelect";
+import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from 'react-router-dom';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -62,6 +65,8 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
+  const { login } = useAuth();
+  const navigation = useNavigate();
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -71,13 +76,27 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     setOpen(false);
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     console.log({
       email: data.get('email'),
       password: data.get('password'),
     });
+    try {
+      const response = await axios.post('http://localhost:8000/auth/verify', null, {
+        headers: {
+          'username': data.get('email') as string || '',
+          'key': data.get('password') as string || ''
+        }
+      })
+      console.log(response.status);
+      login(data.get('email') as string)
+      navigation('/events');
+    } catch (error) {
+      console.error('Error en la autenticación')
+      navigation('/codereader');
+    }
   };
 
   const validateInputs = () => {
@@ -95,7 +114,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       setEmailErrorMessage('');
     }
 
-    if (!password.value || password.value.length < 6) {
+    if (!password.value) {
       setPasswordError(true);
       setPasswordErrorMessage('Password must be at least 6 characters long.');
       isValid = false;
@@ -113,13 +132,12 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       <SignInContainer direction="column" justifyContent="space-between">
         <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
         <Card variant="outlined">
-          <SitemarkIcon />
           <Typography
             component="h1"
             variant="h4"
             sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
           >
-            Sign in
+            Iniciar Sesión
           </Typography>
           <Box
             component="form"
@@ -133,14 +151,14 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             }}
           >
             <FormControl>
-              <FormLabel htmlFor="email">Email</FormLabel>
+              <FormLabel htmlFor="email">Correo Electrónico</FormLabel>
               <TextField
                 error={emailError}
                 helperText={emailErrorMessage}
                 id="email"
                 type="email"
                 name="email"
-                placeholder="your@email.com"
+                placeholder="correo@email.com"
                 autoComplete="email"
                 autoFocus
                 required
@@ -152,14 +170,14 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             </FormControl>
             <FormControl>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <FormLabel htmlFor="password">Password</FormLabel>
+                <FormLabel htmlFor="password">Contraseña</FormLabel>
                 <Link
                   component="button"
                   onClick={handleClickOpen}
                   variant="body2"
                   sx={{ alignSelf: 'baseline' }}
                 >
-                  Forgot your password?
+                  Olvidé mi contraseña
                 </Link>
               </Box>
               <TextField
@@ -179,7 +197,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             </FormControl>
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
+              label="Recuérdame"
             />
             <Button
               type="submit"
@@ -187,17 +205,17 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               variant="contained"
               onClick={validateInputs}
             >
-              Sign in
+              Iniciar Sesión
             </Button>
             <Typography sx={{ textAlign: 'center' }}>
-              Don&apos;t have an account?{' '}
+              ¿No tienes una cuenta?{' '}
               <span>
                 <Link
-                  href="/material-ui/getting-started/templates/sign-in/"
+                  href="/"
                   variant="body2"
                   sx={{ alignSelf: 'center' }}
                 >
-                  Sign up
+                  Registrate
                 </Link>
               </span>
             </Typography>
@@ -208,19 +226,19 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               type="submit"
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign in with Google')}
+              onClick={() => alert('Inicio de sesión con Google')}
               startIcon={<GoogleIcon />}
             >
-              Sign in with Google
+              Inicio de sesión con Google
             </Button>
             <Button
               type="submit"
               fullWidth
               variant="outlined"
-              onClick={() => alert('Sign in with Facebook')}
+              onClick={() => alert('Inicio de sesión con Facebook')}
               startIcon={<FacebookIcon />}
             >
-              Sign in with Facebook
+              Inicio de sesión con Facebook
             </Button>
           </Box>
         </Card>
