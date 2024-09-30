@@ -1,4 +1,4 @@
-use axum::Router;
+use axum::{body::Body, http::Request, middleware::{self, Next}, response::IntoResponse, Router};
 
 use crate::api::events::BackEventsServices;
 
@@ -18,5 +18,14 @@ impl ApiRouter {
             self.get_path_base(),
             Router::new().merge(BackEventsServices::new().get_router()),
         )
+		.layer(middleware::from_fn(add_cors_header))
     }
+}
+
+async fn add_cors_header(req: Request<Body>, next: Next) -> impl IntoResponse {
+    let mut response = next.run(req).await;
+    response
+        .headers_mut()
+        .insert("Access-Control-Allow-Origin", "*".parse().unwrap());
+    response
 }
