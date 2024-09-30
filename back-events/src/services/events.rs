@@ -1,22 +1,21 @@
-use bcrypt::verify;
-use lib_protos::{users_manager_services_client::UsersManagerServicesClient, GetUserRequest};
+use lib_protos::{
+    user_event_rel_manager_services_client::UserEventRelManagerServicesClient,
+    GetUserEventRelRequest, UserEventRel,
+};
 use tonic::Request;
+use uuid::Uuid;
 
 use crate::{
     config::conf::CONFIG,
     models::errors::{ErrorKind, Exception},
 };
 
-pub struct UsersManager;
+pub struct EventsManager;
 
-impl UsersManager {
-    pub fn new() -> Self {
-        UsersManager
-    }
-
-    pub async fn verify_user(&self, username: &str, key: &str) -> Result<bool, Exception> {
-        let mut client = match UsersManagerServicesClient::connect(
-            CONFIG.get_users_manager_config().get_conn_str(),
+impl EventsManager {
+    pub async fn verify_ticket(&self, id: Uuid) -> Result<UserEventRel, Exception> {
+        let mut client = match UserEventRelManagerServicesClient::connect(
+            CONFIG.get_events_manager_config().get_conn_str(),
         )
         .await
         {
@@ -25,20 +24,18 @@ impl UsersManager {
                 return Err(Exception::new(
                     ErrorKind::InternalServerError,
                     &format!(
-                        "Failed to connect to the users manager service**: {}",
+                        "Failed to connect to the events manager service**: {}",
                         e.to_string()
                     ),
                 ))
             }
         };
 
-        let password: String = match client
-            .get(Request::new(GetUserRequest {
-                username: username.to_string(),
-            }))
+        let rel: UserEventRel = match client
+            .get(Request::new(GetUserEventRelRequest { id: id.to_string() }))
             .await
         {
-            Ok(response) => response.into_inner().password,
+            Ok(response) => response.into_inner(),
             Err(e) => match e.code() {
                 tonic::Code::NotFound => {
                     return Err(Exception::new(
@@ -55,12 +52,6 @@ impl UsersManager {
             },
         };
 
-        match verify(key, &password) {
-            Ok(is_valid) => Ok(is_valid),
-            Err(e) => Err(Exception::new(
-                ErrorKind::InternalServerError,
-                &format!("Failed to verify user: {}", e),
-            )),
-        }
+        Ok(rel)
     }
 }

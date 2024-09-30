@@ -1,23 +1,26 @@
 use axum::{
+    extract::Path,
     http::{HeaderMap, StatusCode},
     response::{IntoResponse, Response},
-    routing::post,
+    routing::get,
     Json, Router,
 };
+use lib_protos::UserEventRel;
+use uuid::Uuid;
 
 use crate::{
     models::errors::{ErrorKind, Exception},
-    services::users::UsersManager,
+    services::{auth::AuthService, events::EventsManager},
 };
 
-pub struct AuthServices {
+pub struct BackEventsServices {
     path_base: String,
 }
 
-impl AuthServices {
+impl BackEventsServices {
     pub fn new() -> Self {
         Self {
-            path_base: "/auth".to_string(),
+            path_base: "/".to_string(),
         }
     }
 
@@ -26,15 +29,14 @@ impl AuthServices {
     }
 
     pub fn get_router(&self) -> Router {
-        Router::new()
-            .nest(
-                self.get_path_base(),
-                Router::new().route("/verify", post(verify_token)),
-            )
+        Router::new().nest(
+            self.get_path_base(),
+            Router::new().route("/verify-ticket/:id", get(verify_ticket)),
+        )
     }
 }
 
-pub async fn verify_token(headers: HeaderMap) -> Response {
+pub async fn verify_ticket(headers: HeaderMap, Path(id): Path<Uuid>) -> Response {
     let username_header = headers.get("username");
     let key_header = headers.get("key");
 
@@ -49,7 +51,7 @@ pub async fn verify_token(headers: HeaderMap) -> Response {
                         "Invalid headers in request",
                     )),
                 )
-                    .into_response();
+                    .into_response()
             }
         };
 
@@ -80,14 +82,19 @@ pub async fn verify_token(headers: HeaderMap) -> Response {
             .into_response();
     };
 
-    let is_verified = match UsersManager::new().verify_user(username, key).await {
-        Ok(is_verified) => is_verified,
-        Err(e) => return (e.to_http_error_response()).into_response(),
+    match AuthService::new().verify_user(username, key).await {
+        Ok(_) => {}
+        Err(e) => {
+            return e.to_http_error_response().into_response();
+        }
     };
 
-    if is_verified {
-        (StatusCode::ACCEPTED).into_response()
-    } else {
-        (StatusCode::UNAUTHORIZED).into_response()
-    }
+    let rel: UserEventRel = match EventsManager.verify_ticket(id).await {
+        Ok(e) => e,
+        Err(e) => {
+            return e.to_http_error_response().into_response();
+        }
+    };
+
+    (StatusCode::OK, Json(rel)).into_response()
 }
