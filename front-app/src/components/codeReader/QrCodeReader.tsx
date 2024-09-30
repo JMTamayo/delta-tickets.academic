@@ -57,7 +57,7 @@ const ReaderContainer = styled(Stack)(({ theme }) => ({
 
 export default function QRCodeReader(props: { disableCustomTheme?: boolean }) {
     const [validationMessage, setValidationMessage] = useState('');
-    const { logout } = useAuth();
+    const { userEmail, password, logout } = useAuth();
     const navigation = useNavigate();
 
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,26 +78,28 @@ export default function QRCodeReader(props: { disableCustomTheme?: boolean }) {
                         context.drawImage(imgElement, 0, 0);
                         const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
                         const code = jsQR(imageData.data, canvas.width, canvas.height);
+                        console.log(code)
                         if (code) {
                             await validateQRCode(code.data)
                         } else {
-                            setValidationMessage('No QR code found.');
+                            setValidationMessage('No se encontró código');
                         }
                     }
                 };
             };
             reader.readAsDataURL(file);
         } else {
-            setValidationMessage('No file selected.');
+            setValidationMessage('No se seleccionó el archivo');
         }
     };
 
     const validateQRCode = async (qrCode: string) => {
         try {
-            const response = await fetch(`http://localhost:3000/eventos?qrcode=${qrCode}`, {
+            const response = await fetch(`http://localhost:8001/verify-ticket/${qrCode}`, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'username': userEmail as string || '',
+                    'key': password as string || ''
                 },
             });
 
@@ -106,14 +108,15 @@ export default function QRCodeReader(props: { disableCustomTheme?: boolean }) {
             }
 
             const data = await response.json();
-            if (data.exists) { // Assuming your API returns an `exists` field
-                setValidationMessage('QR Code is valid!');
+            console.log(data)
+            if (response.status == 200) { // Assuming your API returns an `exists` field
+                setValidationMessage('Acceso permitido');
             } else {
-                setValidationMessage('QR Code does not exist in the database.');
+                setValidationMessage('El código no es válido');
             }
         } catch (error) {
             console.error('Error validating QR Code:', error);
-            setValidationMessage('Error validating QR Code.');
+            setValidationMessage('El código no es válido');
         }
     };
 
