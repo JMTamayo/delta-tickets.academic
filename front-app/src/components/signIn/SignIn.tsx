@@ -84,18 +84,29 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       password: data.get('password'),
     });
     try {
-      const response = await axios.post('http://localhost:8000/auth/verify', null, {
+      const response_auth = await axios.post('http://localhost:8000/auth/verify', null, {
         headers: {
           'username': data.get('email') as string || '',
           'key': data.get('password') as string || ''
         }
       })
-      console.log(response.status);
-      login(data.get('email') as string)
-      navigation('/events');
+      const response = await axios.get('http://localhost:8002/user/', {
+        headers: {
+          'username': data.get('email') as string || '',
+          'key': data.get('password') as string || ''
+        }
+      })
+      login(data.get('email') as string, data.get('password') as string)
+      console.log(response.data.role.name)
+      if (response.data.role.name == 'READER') {
+        console.log("llegue")
+        navigation('/events')
+      } else if (response.data.role.name == 'ADMIN') {
+        navigation('/codereader')
+      } else 
+      console.error('Error en la autenticación')
     } catch (error) {
       console.error('Error en la autenticación')
-      navigation('/codereader');
     }
   };
 

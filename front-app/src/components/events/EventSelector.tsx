@@ -63,25 +63,15 @@ interface Evento {
 
 export default function EventSelector(props: { disableCustomTheme?: boolean }) {
     const [eventos, setEventos] = useState<Evento[]>([
-        { id: 1, nombre: 'SuperBowl 2025', codigoQR: 'QR123' },
+        { id: 1, nombre: 'SuperBowl 2025', codigoQR: 'b728d7dc-5d73-4a05-a960-baa3a7705335' },
         { id: 2, nombre: 'Concierto Paul McCartney', codigoQR: 'QR456' },
         { id: 3, nombre: 'Concierto de Feid', codigoQR: 'QR789' },
     ]);
     const [open, setOpen] = useState(false);
     const [eventoSeleccionado, setEventoSeleccionado] = useState<Evento | null>(null);
-    const { userEmail, logout } = useAuth();
+    const { userEmail, password, logout } = useAuth();
     const navigation = useNavigate();
     const handleClose = () => setOpen(false);
-    useEffect(() => {
-        const fetchEventos = async () => {
-            if (userEmail) {
-                // const response = await axios.get(`http://localhost:3000/eventos?email=${userEmail}`);
-                // setEventos(response.data);
-                console.log(userEmail)
-            }
-        };
-        fetchEventos();
-    }, [userEmail]);
 
     const handleSelectEvento = (evento: Evento) => {
         setEventoSeleccionado(evento);
@@ -152,6 +142,7 @@ export default function EventSelector(props: { disableCustomTheme?: boolean }) {
                             <div>
                                 <h2>{eventoSeleccionado.nombre}</h2>
                                 <QRCodeCanvas value={eventoSeleccionado.codigoQR} size={256} />
+                                <h2>{eventoSeleccionado.codigoQR}</h2>
                             </div>
                         )}
                     </Box>

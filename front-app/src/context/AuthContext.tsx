@@ -3,7 +3,8 @@ import React, { createContext, useState, useContext, ReactNode } from 'react';
 // Define the context type
 interface AuthContextType {
     userEmail: string | null;
-    login: (email: string) => void;
+    password: string | null;
+    login: (email: string, password: string) => void;
     logout: () => void;
 }
 
@@ -13,17 +14,20 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Provider for the context
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [userEmail, setUserEmail] = useState<string | null>(null);
+    const [password, setPassword] = useState<string | null>(null);
 
-    const login = (email: string) => {
+    const login = (email: string, password: string) => {
         setUserEmail(email);
+        setPassword(password);
     };
 
     const logout = () => {
         setUserEmail(null);
+        setPassword(null);
     };
 
     return (
-        <AuthContext.Provider value={{ userEmail, login, logout }}>
+        <AuthContext.Provider value={{ userEmail, password, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
